@@ -1,0 +1,22 @@
+{
+  "name": "query-budget-npm",
+  "version": "1.0.0",
+  "description": "query-budget",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ArturDerr/Query-Budget-npm.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ArturDerr/Query-Budget-npm/issues"
+  },
+  "homepage": "https://github.com/ArturDerr/Query-Budget-npm#readme",
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}
