@@ -23,5 +23,4 @@ const monitor = init({
 ```
 
 ### Схема работы
-
 ![alt text](image.png)

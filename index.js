@@ -1,3 +1,5 @@
+'use strict'
+
 // базовые значения
 const DEFAULT_VALUES {
     windowMs: 1000, // временное окно между запросами в миллисекундах
@@ -9,10 +11,66 @@ const DEFAULT_VALUES {
     };
 };
 
-// главная функция
 export function init(options = {}) {
     const config = {
         ...DEFAULT_VALUES,
         ...options
     };
+};
+
+const originalFetch = globalThis.fetch();
+// кол-во запросов
+const requests = new Map();
+// включен ли мониторинг
+let active = true;
+
+// обработчик ошибок
+function report(issue) {
+    try {
+        config.onIssue(issue)
+    } catch (error) {
+        console.log('[netwatch] Error:'), error;
+    };
+};
+
+// ключ запроса
+function createKey(method, url, body) {
+    return JSON.stringify(method, url, body);
+};
+
+// фун-я обнаружения повторяющих запросов
+function detectRequest(method, url, body) {
+    const now = Date.now();
+    const key = createKey(method, url, body);
+    const previous = reguests.get(key);
+    
+    if (previous && now - previous.timestamp <= config.windowMs) {
+        previous.count += 1;
+        previous.timestamp = now;
+
+        // создание репорта
+        report({
+            type: "duplicate",
+            method,
+            url, 
+            count: previous.count,
+            timestamp: now,
+        });
+    } else {
+        requests.set(key, {
+            timestamp: now,
+            count: 1,
+        });
+    };  
+};
+
+// ограничение памяти
+while(requests.size > config.maxEntries) {
+    const oldestKey = requests.keys().next().value;
+
+    if (oldestKey == undefined) {
+        break;
+    };
+
+    requests.delete(oldestKey);
 };
