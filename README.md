@@ -20,6 +20,7 @@ const monitor = init({
     console.warn(`[netwatch] ${issue.type}: ${issue.method} ${issue.url}`, issue);
   },
 });
+```
 
 ### Схема работы
 
