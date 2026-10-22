@@ -1,5 +1,3 @@
-'use strict'
-
 // базовые значения
 const DEFAULT_VALUES {
     windowMs: 1000, // временное окно между запросами в миллисекундах
@@ -29,7 +27,7 @@ function report(issue) {
     try {
         config.onIssue(issue)
     } catch (error) {
-        console.log('[netwatch] Error:'), error;
+        console.error('[netwatch] Error:'), error;
     };
 };
 
@@ -73,4 +71,51 @@ while(requests.size > config.maxEntries) {
     };
 
     requests.delete(oldestKey);
+};
+
+// фун-я мониторинга запросов
+async function monitoredFetch(input, int = {}) {
+    if (!active) {
+        return originalFetch.call(globalThis, input, init)
+    }
+
+    try {
+        let request = null;
+
+        if (input instanceof Request) {
+            request = input;
+        }
+
+        // проверка на запрос
+        const rawUrl = request ? request.url : String(input);
+
+        // нормализуем url
+        const url = new URL(rawUrl, globalThis.location?.href ?? 'http://localhost').href;
+
+        // какой метод используется
+        const method = (init.method ?? request?.method ?? "GET").toUpperCase();
+
+        const body = typeof init.body === "string" ? init.body : "";
+
+        detectRequest(method, url, body);
+    } catch (error) {
+        console.error(`[netwatch] Monitoring error: ${error}`);
+    };
+
+    // отправляем запрос
+    return originalFetch.call(globalThis, input, init);
+};
+
+globalThis.fetch = monitoredFetch;
+
+return {
+    stop() {
+        active = false;
+
+        if (globalThis.fetch === monitoredFetch) {
+            globalThis.fetch = originalFetch;
+        };
+
+        requests.clear();
+    }
 };
